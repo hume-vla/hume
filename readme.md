@@ -18,7 +18,7 @@
 ### 🚀 Quick Start
 
 ```bash
-git clone https://github.com/hume-vla/hume
+git clone https://github.com/hume-vla/hume.git
 conda create -n hume python=3.10
 conda activate hume
 cd hume

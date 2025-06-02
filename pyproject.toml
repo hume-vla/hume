@@ -1,0 +1,70 @@
+[project]
+name = "hume"
+version = "0.1.0"
+description = "Hume: A dual-system vision-language-action model with System 2 Thinking"
+readme = "README.md"
+requires-python = "==3.10.*"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "torchaudio==2.6.0",
+    "transformers==4.48.1",
+    "tyro==0.8.10",
+    "numpy==1.26.4",
+    "jaxtyping==0.3.1",
+    "beartype==0.20.2",
+    "lerobot @ git+https://github.com/huggingface/lerobot.git@768e36660d1408c71118a2760f831c037fbfa17d",
+    "ipdb",
+    "accelerate==1.5.2",
+    "pytest"
+]
+
+[project.urls]
+Homepage = "https://hume-vla.github.io"
+"Bug Tracker" = "https://hume-vla.github.io"
+
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["F722"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
+lerobot = { path = "../lerobot" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://mirror.sjtu.edu.cn/pytorch-wheels/cu121"
+explicit = true
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = [".assets", "dist*", "playground*", "scripts*", "shell*", "test", "outputs"]
+
+[tool.wheel]
+exclude = [".assets", "dist*", "playground*", "scripts*", "shell*", "test", "outputs"]

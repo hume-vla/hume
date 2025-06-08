@@ -13,6 +13,11 @@
 ## News
 - `2025/06/03`: We release the training codebase of Hume.
 
+## Try Hume
+### LIBERO
+> [!NOTE]
+> Follow the instruction in [LIBERO](experiments/libero/README.md) 
+
 ## Documents
 
 ### 🚀 Quick Start

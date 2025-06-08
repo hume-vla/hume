@@ -156,12 +156,9 @@ cython_debug/
 
 outputs
 data
-libero/
 
 autoencoderkl-model
 
-test/libero
-test/libero/*
 test/pretrained
 
 temp_ckpt/pretrained_model
@@ -175,3 +172,5 @@ pretrained_cpfs
 pretrianed_s2
 dev/
 experiments/libero/logs
+exported
+test

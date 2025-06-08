@@ -173,3 +173,5 @@ temp_ckpt/
 packages
 pretrained_cpfs
 pretrianed_s2
+dev/
+experiments/libero/logs

@@ -3,7 +3,7 @@ from copy import deepcopy
 from functools import partial
 from typing import Callable, Optional, Sequence, Tuple, Union
 
-import hume.array_typing as at
+import array_typing as at
 import numpy as np
 import torch
 import torch.nn as nn

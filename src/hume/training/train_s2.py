@@ -36,13 +36,13 @@ from lerobot.configs import parser
 from lerobot.configs.default import DatasetConfig as LeroBotDatasetConfig
 from lerobot.configs.train import TrainPipelineConfig as LeroBotTrainPipelineConfig
 from lerobot.scripts.eval import eval_policy
-from lerobot_patch import make_dataset, make_policy
 from termcolor import colored
 from torch.optim import Optimizer
 from tqdm.auto import tqdm
-from transforms import ImageTransformsConfig
 
 from hume.models.modeling_hume import System2Policy
+from hume.training.lerobot_patch import make_dataset, make_policy
+from hume.training.transforms import ImageTransformsConfig
 
 
 @dataclass

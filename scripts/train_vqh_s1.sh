@@ -47,7 +47,7 @@ data_map["libero_10"]=libero_10_no_noops_1.0.0_lerobot
 
 
 declare -A pretrained_map
-pretrained_map["libero_spatial"]=/path/to/pretrained_system2
+pretrained_map["libero_spatial"]=outputs/hume_s2/2025-06-08/16-38-43_hume_s2_libero_goal_no_noops_1.0.0_lerobot_ck4_gpu1_lr5e-5_bs8_s200k/checkpoints/000005/pretrained_model
 pretrained_map["libero_object"]=/path/to/pretrained_system2
 pretrained_map["libero_goal"]=/path/to/pretrained_system2
 pretrained_map["libero_10"]=/path/to/pretrained_system2

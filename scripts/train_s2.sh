@@ -51,7 +51,7 @@ cfg=$(echo $dataset | sed 's/^\([a-zA-Z]\+\).*/\1/')
 lr=5e-5
 steps=$((GPUS * 200000))
 chunk_size=4
-pretrained_policy="path/to/pretrained/system2"
+pretrained_policy="pretrianed_s2"
 
 job_name=hume_s2_${dataset}_ck${chunk_size}_gpu${GPUS}_lr${lr}_bs${PER_DEVICE_BATCH_SIZE}_s$((steps / 1000))k
 accelerate launch $ACCELERATE_ARGS src/hume/training/train_s2.py \

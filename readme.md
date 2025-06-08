@@ -11,6 +11,7 @@
 </div>
 
 ## News
+- `2025/06/08`: Release the evaluation code and ckpts on LIBERO
 - `2025/06/03`: We release the training codebase of Hume.
 
 ## Try Hume

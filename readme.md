@@ -14,6 +14,13 @@
 - `2025/06/08`: Release the evaluation code and ckpts on LIBERO
 - `2025/06/03`: We release the training codebase of Hume.
 
+## TODO LIST
+- [x] Release Training Code
+- [x] Release LIBERO Evaluation
+- [ ] Using `uv` Manage Projects
+- [ ] Release Real-Wold Evaluation
+- [ ] Release Simpler Evaluation
+
 ## Try Hume
 ### LIBERO
 > [!NOTE]

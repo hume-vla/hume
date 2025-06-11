@@ -1,19 +1,26 @@
 # LIBERO Evaluation
-## Install
-- Follow the instruction in `https://github.com/Lifelong-Robot-Learning/LIBERO`
+## 🛠️ Installation
+This example runs the LIBERO benchmark: https://github.com/Lifelong-Robot-Learning/LIBERO
+
+Note: When updating requirements.txt in this directory, there is an additional flag `--extra-index-url https://download.pytorch.org/whl/cu113` that must be added to the `uv pip compile` command.
+
+This example requires git submodules to be initialized. Don't forget to run:
+
 ```bash
-conda create -n libero python=3.8.13
-conda activate libero
-git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
-cd LIBERO
-pip install -r requirements.txt
+git submodule update --init --recursive
 ```
-- Install dependences of Hume
+
+Create virtual environment
+
 ```bash
-pip install jaxtyping beartype tyro transformers==4.48.1 numpy==1.26.4
-pip install git+https://github.com/huggingface/lerobot.git@768e36660d1408c71118a2760f831c037fbfa17d
-``` 
-## Download the Checkpoints
+uv venv --python 3.8 experiments/libero/.venv
+source experiments/libero/.venv/bin/activate
+uv pip sync experiments/libero/requirements.txt 3rd/LIBERO/requirements.txt --extra-index-url https://download.pytorch.org/whl/cu113 --index-strategy=unsafe-best-match
+uv pip install -e packages/openpi-client
+uv pip install -e 3rd/LIBERO
+```
+
+## 🛝  Download the Checkpoints
 <table>
   <tr>
     <th>Model Name</th>
@@ -25,16 +32,42 @@ pip install git+https://github.com/huggingface/lerobot.git@768e36660d1408c71118a
   </tr>
 </table>
 
-## Evaluation
+## 🖥️  Run Evaluation
+
+In terminal 1 (Start Policy Server)
+
+```bash
+bash scripts/serve_policy.sh
 ```
-# Eval of LIBERO-SPATIAL
-bash experiments/libero/scripts/libero_spatial.sh
-# Eval of LIBERO-GOAL
-bash experiments/libero/scripts/libero_goal.sh
-# Eval of LIBERO-OBJECT
-bash experiments/libero/scripts/libero_object.sh
-# Evak of LIBERO-10
-bash experiments/libero/scripts/libero_10.sh
+
+In terminal 2 (Launch LIBERO Eval)
+
+```bash
+bash experiments/libero/scripts/eval_libero.sh
 ```
+
+
 > [!NOTE]
-> We Provide serval `TTS args` in scripts, you can try them seperately 
+> We Provide multiple `TTS args`, you can try them seperately in `experiments/libero/scripts/eval_libero.sh`
+> ```bash
+> # TTS args - 1
+> s2_candidates_num=5
+> noise_temp_lower_bound=1.0
+> noise_temp_upper_bound=1.0
+> time_temp_lower_bound=0.9
+> time_temp_upper_bound=1.0
+> 
+> # TTS args - 2
+> s2_candidates_num=5
+> noise_temp_lower_bound=1.0
+> noise_temp_upper_bound=1.2
+> time_temp_lower_bound=1.0
+> time_temp_upper_bound=1.0
+> 
+> # TTS args - 3
+> s2_candidates_num=5
+> noise_temp_lower_bound=1.0
+> noise_temp_upper_bound=2.0
+> time_temp_lower_bound=1.0
+> time_temp_upper_bound=1.0
+> ```

@@ -3,7 +3,6 @@ from copy import deepcopy
 from functools import partial
 from typing import Callable, Optional, Sequence, Tuple, Union
 
-import array_typing as at
 import numpy as np
 import torch
 import torch.nn as nn
@@ -26,6 +25,8 @@ from transformers import (
     PreTrainedModel,
 )
 from transformers.models.auto import CONFIG_MAPPING
+
+from .. import array_typing as at
 
 
 def extend_and_repeat(tensor: torch.Tensor, dim: int, repeat: int) -> torch.Tensor:

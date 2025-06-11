@@ -17,21 +17,6 @@ from libero.libero import benchmark, get_libero_path
 from libero.libero.envs import OffScreenRenderEnv
 from PIL import Image
 
-
-def load_hume_from_ckpts(path, **kwargs):
-    import sys
-
-    sys.path.insert(0, path)  # noqa
-    map_location = kwargs.pop("map_location", "cpu")
-    from modeling_hume import HumePolicy
-
-    hume = HumePolicy.from_pretrained(path, **kwargs).to(map_location)
-
-    sys.path.pop(0)  # Remove the path from sys.path to avoid conflicts
-
-    return hume
-
-
 def exception_hook(exctype, value, traceback):
     print("exception:", exctype, value)
     ipdb.post_mortem(traceback)
@@ -47,6 +32,9 @@ LIBERO_ENV_RESOLUTION = 256  # resolution used to render training data
 
 @dataclasses.dataclass
 class Args:
+    policy_ip: str = "0.0.0.0"
+    policy_port: int = 8000    
+
     resize_size: int = 224
     replan_steps: int = 5
 

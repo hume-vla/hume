@@ -3,26 +3,27 @@ import math
 from argparse import Namespace
 from collections import deque
 
-import array_typing as at
 import numpy as np
 import torch
 import torch.nn.functional as F  # noqa: N812
 import torchvision.transforms.functional as TF
 from beartype import beartype as typechecker
-from configuration_hume import HumeConfig, System2Config
-from fast_visuo_expert import FastVisuoExpertConfig, FastVisuoExpertModel
 from jaxtyping import Bool, Float, Int64, jaxtyped
 from lerobot.common.constants import ACTION, OBS_ROBOT
 from lerobot.common.policies.normalize import Normalize, Unnormalize
 from lerobot.common.policies.pretrained import PreTrainedPolicy
 from lerobot.common.utils.utils import get_safe_dtype
-from paligemma_with_expert import (
+from torch import Tensor, nn
+from transformers import AutoTokenizer
+
+from .. import array_typing as at
+from .configuration_hume import HumeConfig, System2Config
+from .fast_visuo_expert import FastVisuoExpertConfig, FastVisuoExpertModel
+from .paligemma_with_expert import (
     PaliGemmaWithExpertConfig,
     PaliGemmaWithExpertModel,
 )
-from torch import Tensor, nn
-from transformers import AutoTokenizer
-from value_query import (
+from .value_query import (
     CalQL,
     CalQlConfig,
     VQHBackbone,
@@ -739,22 +740,6 @@ class HumePolicy(PreTrainedPolicy):
         print(f"Saving the language tokenizer to {save_directory} ...")
         self.language_tokenizer.save_pretrained(save_directory)
 
-        import shutil
-
-        files = [
-            "src/hume/models/array_typing.py",
-            "src/hume/models/configuration_hume.py",
-            "src/hume/models/fast_visuo_expert.py",
-            "src/hume/models/modeling_hume.py",
-            "src/hume/models/paligemma_with_expert.py",
-            "src/hume/models/value_query.py",
-        ]
-        try:
-            for file in files:
-                shutil.copy(file, save_directory)
-        except Exception:
-            print("Failed to copy files to save_directory")
-
     @classmethod
     def from_pretrained(
         cls,
@@ -1006,22 +991,6 @@ class System2Policy(PreTrainedPolicy):
         super()._save_pretrained(save_directory)
         print(f"Saving the language tokenizer to {save_directory} ...")
         self.language_tokenizer.save_pretrained(save_directory)
-
-        import shutil
-
-        files = [
-            "src/hume/models/array_typing.py",
-            "src/hume/models/configuration_hume.py",
-            "src/hume/models/fast_visuo_expert.py",
-            "src/hume/models/modeling_hume.py",
-            "src/hume/models/paligemma_with_expert.py",
-            "src/hume/models/value_query.py",
-        ]
-        try:
-            for file in files:
-                shutil.copy(file, save_directory)
-        except Exception:
-            print("Failed to copy files to save_directory")
 
     @classmethod
     def from_pretrained(

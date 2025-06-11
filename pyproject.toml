@@ -3,24 +3,22 @@ name = "hume"
 version = "0.1.0"
 description = "Hume: A dual-system vision-language-action model with System 2 Thinking"
 readme = "README.md"
-requires-python = "==3.10.*"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "torch==2.6.0",
-    "torchvision==0.21.0",
-    "torchaudio==2.6.0",
-    "transformers==4.48.1",
+    "transformers @ git+https://github.com/huggingface/transformers@6daa3eeba582facb57cd71db8efb66998b12942f",
     "tyro==0.8.10",
     "numpy==1.26.4",
     "jaxtyping==0.3.1",
     "beartype==0.20.2",
-    "lerobot @ git+https://github.com/huggingface/lerobot.git@768e36660d1408c71118a2760f831c037fbfa17d",
+    "lerobot @ git+https://github.com/huggingface/lerobot@768e36660d1408c71118a2760f831c037fbfa17d",
     "ipdb",
     "accelerate==1.5.2",
-    "pytest"
+    "pytest",
+    "openpi-client"
 ]
 
 [project.urls]
@@ -31,6 +29,8 @@ Homepage = "https://hume-vla.github.io"
 [tool.ruff]
 line-length = 88
 indent-width = 4
+extend-exclude = ["3rd"]
+
 
 target-version = "py310"
 
@@ -47,12 +47,22 @@ indent-style = "space"
 torch = { index = "pytorch" }
 torchvision = { index = "pytorch" }
 torchaudio = { index = "pytorch" }
-lerobot = { path = "../lerobot" }
+lerobot = { git = "https://github.com/huggingface/lerobot", rev = "768e36660d1408c71118a2760f831c037fbfa17d" }
+transformers = { git = "https://github.com/huggingface/transformers", rev = "6daa3eeba582facb57cd71db8efb66998b12942f"}
+openpi-client = { path = "packages/openpi-client" }
+
 
 [[tool.uv.index]]
 name = "pytorch"
 url = "https://mirror.sjtu.edu.cn/pytorch-wheels/cu121"
 explicit = true
+
+# [[tool.uv.index]]
+# name = "aliyun"
+# url = "https://mirrors.cloud.aliyuncs.com/pypi/simple"
+
+[tool.uv]
+allow-insecure-host = ["mirrors.cloud.aliyuncs.com"]
 
 
 [build-system]

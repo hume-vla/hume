@@ -87,7 +87,7 @@ requests==2.32.3
     # via torchvision
 rich==13.9.4
     # via tyro
-robosuite==1.4.1
+robosuite==1.4.0
     # via -r examples/libero/requirements.in
 scipy==1.10.1
     # via robosuite
@@ -134,3 +134,4 @@ zipp==3.20.2
     #   etils
     #   importlib-metadata
     #   importlib-resources
+ipdb==0.13.13

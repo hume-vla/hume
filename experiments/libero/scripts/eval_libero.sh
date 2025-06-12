@@ -1,11 +1,19 @@
-# set conda
+# set env
 export TZ=UTC-8
-export PYTHONPATH=$PYTHONPATH:$PWD/third_party/libero
+export PYTHONPATH=$PYTHONPATH:$PWD/3rd/LIBERO
 source experiments/libero/.venv/bin/activate
 
+# Put ckpts here
+ckpts=(
+    exported/libero/2025-05-02/08-10-44_libero_goal_ck8-16-1_sh-4_gpu8_lr5e-5_1e-5_1e-5_2e-5_bs16_s1600k/0090000
+    exported/libero/2025-05-02/08-10-44_libero_goal_ck8-16-1_sh-4_gpu8_lr5e-5_1e-5_1e-5_2e-5_bs16_s1600k/0120000
+    exported/libero/2025-05-02/08-10-44_libero_goal_ck8-16-1_sh-4_gpu8_lr5e-5_1e-5_1e-5_2e-5_bs16_s1600k/0150000
+    exported/libero/2025-05-02/08-10-44_libero_goal_ck8-16-1_sh-4_gpu8_lr5e-5_1e-5_1e-5_2e-5_bs16_s1600k/0190000
+)
+
 # Server Info
-policy_ip="0.0.0.0"
-policy_port=8000   
+host="0.0.0.0"
+port=8000
 
 # TTS args
 s2_candidates_num=5
@@ -19,7 +27,6 @@ s1_replan_steps=8
 s2_replan_steps=16
 
 task_suite_name=libero_goal
-run_ckpt_name=test
 
 test_name="s1-${s1_replan_steps}_"\
 "s2-${s2_replan_steps}_"\
@@ -29,20 +36,43 @@ test_name="s1-${s1_replan_steps}_"\
 "ttl-${time_temp_lower_bound}_"\
 "ttu-${time_temp_upper_bound}"
 
-job_name=${run_ckpt_name}_${test_name}
+for ckpt in ${ckpts[@]}; do
+    
+    echo $ckpt
+    run_ckpt_name=$(basename $(dirname $ckpt))_$(basename $ckpt)
+    job_name=${run_ckpt_name}_${test_name}
+    echo $job_name
 
-echo $job_name
-python experiments/libero/eval_libero.py \
-    --args.policy_ip $policy_ip \
-    --args.policy_port $policy_port \
-    --args.task-suite-name ${task_suite_name} \
-    --args.job-name ${job_name} \
-    --args.post-process-action \
-    --args.num-trials-per-task 5 \
-    --args.replan-steps ${s1_replan_steps} \
-    --args.s2-replan-steps ${s2_replan_steps} \
-    --args.s2-candidates-num ${s2_candidates_num} \
-    --args.noise-temp-lower-bound ${noise_temp_lower_bound} \
-    --args.noise-temp-upper-bound ${noise_temp_upper_bound} \
-    --args.time-temp-lower-bound ${time_temp_lower_bound} \
-    --args.time-temp-upper-bound ${time_temp_upper_bound} \
+    # launch polciy server in tmux
+    session_name=$(echo $job_name | sed 's/\./_/g')
+    tmux new -s "${session_name}" -d \
+        "bash -c '
+            source scripts/env.sh
+            python -u src/hume/serve_policy.py --ckpt_path $ckpt --port $port
+        '"
+    
+    # cleanup server
+    close_sever() {
+        echo "Closing policy server ${session_name}"
+        tmux kill-session -t "${session_name}"
+    }
+    trap close_sever SIGINT
+
+    # start eval
+    python experiments/libero/eval_libero.py \
+        --args.host $host \
+        --args.port $port \
+        --args.task-suite-name ${task_suite_name} \
+        --args.job-name ${job_name} \
+        --args.post-process-action \
+        --args.num-trials-per-task 5 \
+        --args.replan-steps ${s1_replan_steps} \
+        --args.s2-replan-steps ${s2_replan_steps} \
+        --args.s2-candidates-num ${s2_candidates_num} \
+        --args.noise-temp-lower-bound ${noise_temp_lower_bound} \
+        --args.noise-temp-upper-bound ${noise_temp_upper_bound} \
+        --args.time-temp-lower-bound ${time_temp_lower_bound} \
+        --args.time-temp-upper-bound ${time_temp_upper_bound}
+
+    close_sever
+done

@@ -5,24 +5,15 @@ import logging
 import math
 import os
 import pathlib
-import sys
 from pathlib import Path
 
 import imageio
-import ipdb
 import numpy as np
 import tqdm
 import tyro
 from libero.libero import benchmark, get_libero_path
 from libero.libero.envs import OffScreenRenderEnv
-from PIL import Image
-
-def exception_hook(exctype, value, traceback):
-    print("exception:", exctype, value)
-    ipdb.post_mortem(traceback)
-
-
-sys.excepthook = exception_hook
+from openpi_client import websocket_client_policy as _websocket_client_policy
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -32,8 +23,8 @@ LIBERO_ENV_RESOLUTION = 256  # resolution used to render training data
 
 @dataclasses.dataclass
 class Args:
-    policy_ip: str = "0.0.0.0"
-    policy_port: int = 8000    
+    host: str = "0.0.0.0"
+    port: int = 8000    
 
     resize_size: int = 224
     replan_steps: int = 5
@@ -103,8 +94,8 @@ def eval_libero(args: Args) -> None:
     else:
         raise ValueError(f"Unknown task suite: {args.task_suite_name}")
 
-    policy = load_hume_from_ckpts(args.pretrained_path, map_location="cuda")
-    # policy = HumePolicy.from_pretrained(args.pretrained_path)
+    client = _websocket_client_policy.WebsocketClientPolicy(args.host, args.port)
+
 
     # Start evaluation
     total_episodes, total_successes = 0, 0
@@ -124,7 +115,7 @@ def eval_libero(args: Args) -> None:
             logging.info(f"\nTask: {task_description}")
 
             # Reset environment
-            policy.init_infer(
+            client.init_infer(
                 infer_cfg=dict(
                     replan_steps=args.replan_steps,
                     s2_replan_steps=args.s2_replan_steps,
@@ -185,7 +176,7 @@ def eval_libero(args: Args) -> None:
                     "task": [str(task_description)],
                 }
 
-                action = policy.infer(observation)
+                action = client.infer(observation)
                 # __import__("ipdb").set_trace()
                 # Execute action in environment
                 obs, reward, done, info = env.step(action[0].tolist())
@@ -268,101 +259,6 @@ def _quat2axisangle(quat):
     return (quat[:3] * 2.0 * math.acos(quat[3])) / den
 
 
-def convert_to_uint8(img: np.ndarray) -> np.ndarray:
-    """Converts an image to uint8 if it is a float image.
-
-    This is important for reducing the size of the image when sending it over the network.
-    """
-    if np.issubdtype(img.dtype, np.floating):
-        img = (255 * img).astype(np.uint8)
-    return img
-
-
-def resize_with_pad(
-    images: np.ndarray, height: int, width: int, method=Image.BILINEAR
-) -> np.ndarray:
-    """Replicates tf.image.resize_with_pad for multiple images using PIL. Resizes a batch of images to a target height.
-
-    Args:
-        images: A batch of images in [..., height, width, channel] format.
-        height: The target height of the image.
-        width: The target width of the image.
-        method: The interpolation method to use. Default is bilinear.
-
-    Returns:
-        The resized images in [..., height, width, channel].
-    """
-    # If the images are already the correct size, return them as is.
-    if images.shape[-3:-1] == (height, width):
-        return images
-
-    original_shape = images.shape
-
-    images = images.reshape(-1, *original_shape[-3:])
-    resized = np.stack(
-        [
-            _resize_with_pad_pil(Image.fromarray(im), height, width, method=method)
-            for im in images
-        ]
-    )
-    return resized.reshape(*original_shape[:-3], *resized.shape[-3:])
-
-
-def _resize_with_pad_pil(
-    image: Image.Image, height: int, width: int, method: int
-) -> Image.Image:
-    """Replicates tf.image.resize_with_pad for one image using PIL. Resizes an image to a target height and
-    width without distortion by padding with zeros.
-
-    Unlike the jax version, note that PIL uses [width, height, channel] ordering instead of [batch, h, w, c].
-    """
-    cur_width, cur_height = image.size
-    if cur_width == width and cur_height == height:
-        return image  # No need to resize if the image is already the correct size.
-
-    ratio = max(cur_width / width, cur_height / height)
-    resized_height = int(cur_height / ratio)
-    resized_width = int(cur_width / ratio)
-    resized_image = image.resize((resized_width, resized_height), resample=method)
-
-    zero_image = Image.new(resized_image.mode, (width, height), 0)
-    pad_height = max(0, int((height - resized_height) / 2))
-    pad_width = max(0, int((width - resized_width) / 2))
-    zero_image.paste(resized_image, (pad_width, pad_height))
-    assert zero_image.size == (width, height)
-    return zero_image
-
-
-def make_bool_mask(*dims: int) -> tuple[bool, ...]:
-    """Make a boolean mask for the given dimensions.
-
-    Example:
-        make_bool_mask(2, -2, 2) == (True, True, False, False, True, True)
-        make_bool_mask(2, 0, 2) == (True, True, True, True)
-
-    Args:
-        dims: The dimensions to make the mask for.
-
-    Returns:
-        A tuple of booleans.
-    """
-    result = []
-    for dim in dims:
-        if dim > 0:
-            result.extend([True] * (dim))
-        else:
-            result.extend([False] * (-dim))
-    return tuple(result)
-
-
-def absolute_action_fn(data: dict) -> dict:
-    """Repacks delta actions into absolute action space."""
-    mask = np.asarray(make_bool_mask(6, -1))
-    state, actions = data["state"], data["actions"]
-    dims = mask.shape[-1]
-    actions[..., :dims] += np.expand_dims(np.where(mask, state[..., :dims], 0), axis=-2)
-    data["actions"] = actions
-    return data
 
 
 if __name__ == "__main__":

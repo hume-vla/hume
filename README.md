@@ -11,8 +11,8 @@
 </div>
 
 ## News
-- `2025/06/12`: Manage the project dependency using `uv`
-- `2025/06/08`: Release the evaluation code and ckpts on LIBERO
+- `2025/06/12`: Manage the project dependency using `uv`. Isolate the evaluation and training environments
+- `2025/06/08`: Release the evaluation code and ckpts on LIBERO.
 - `2025/06/03`: We release the training codebase of Hume.
 
 ## TODO LIST

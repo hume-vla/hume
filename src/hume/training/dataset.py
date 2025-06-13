@@ -13,27 +13,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import bisect
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 import datasets
 import torch
 import torch.utils
 from datasets import load_dataset
-from lerobot.common.constants import ACTION, HF_LEROBOT_HOME, OBS_ROBOT
+from lerobot.common.constants import OBS_ROBOT
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset as BaseLeRobotDataset
-from lerobot.common.datasets.lerobot_dataset import (
-    MultiLeRobotDataset as BaseMultiLeRobotDataset,
-)
 from lerobot.common.datasets.utils import (
-    dataset_to_policy_features,
     hf_transform_to_torch,
 )
-from lerobot.common.policies.normalize import Normalize
 from lerobot.common.robot_devices.robots.utils import Robot
-from lerobot.configs.types import NormalizationMode
-from torch.utils.data import ConcatDataset
 
 CODEBASE_VERSION = "v2.1"
 
@@ -307,173 +299,3 @@ class LeRobotDataset(BaseLeRobotDataset):
         )
         obj.wrist_transforms = None
         return obj
-
-
-class MultiLeRobotDataset(BaseMultiLeRobotDataset):
-    """A dataset consisting of multiple underlying `LeRobotDataset`s.
-
-    The underlying `LeRobotDataset`s are effectively concatenated, and this class adopts much of the API
-    structure of `LeRobotDataset`.
-    """
-
-    def __init__(
-        self,
-        repo_ids: list[str],
-        root: str | Path | None = None,
-        episodes: dict | None = None,
-        image_transforms: Callable | None = None,
-        delta_timestamps: dict[list[float]] | None = None,
-        tolerances_s: dict | None = None,
-        download_videos: bool = True,
-        video_backend: str | None = None,
-        weights: list[float] | None = None,
-        **kwargs: Any,
-    ):
-        self.repo_ids = repo_ids
-        self.root = Path(root) if root else HF_LEROBOT_HOME
-        self.tolerances_s = tolerances_s or {repo_id: 1e-4 for repo_id in repo_ids}
-        self.use_sampler = kwargs.get("use_sampler", False)
-        self.datasets_config = kwargs.get("datasets_config", None)
-
-        self._datasets = [
-            LeRobotDataset(
-                repo_id,
-                root=self.root / repo_id,
-                episodes=episodes[repo_id] if episodes else None,
-                image_transforms=image_transforms,
-                delta_timestamps=delta_timestamps[repo_id],
-                tolerance_s=self.tolerances_s[repo_id],
-                download_videos=download_videos,
-                video_backend=video_backend,
-                select_video_keys=self.datasets_config[repo_id]["select_video_keys"]
-                if self.datasets_config
-                else None,
-            )
-            for repo_id in repo_ids
-        ]
-
-        self.cumulative_sizes = ConcatDataset.cumsum(self._datasets)
-        self.weights = torch.DoubleTensor(
-            weights or [len(ds) / self.cumulative_sizes[-1] for ds in self._datasets]
-        )
-        self.sampler = torch.multinomial(
-            self.weights,
-            num_samples=self.cumulative_sizes[-1],
-            replacement=True,
-        )
-
-        self.image_transforms = image_transforms
-        self.delta_timestamps = delta_timestamps
-
-        """set nomalizer for mutiple datasets."""
-        features = dataset_to_policy_features(self.features)
-        normalization_mapping = {
-            "VISUAL": NormalizationMode.IDENTITY,
-            "STATE": NormalizationMode.MEAN_STD,
-            "ACTION": NormalizationMode.MEAN_STD,
-        }
-        self.normalize_fea = Normalize(features, normalization_mapping, self.stats)
-
-    def __len__(self):
-        return self.cumulative_sizes[-1]
-
-    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
-        # https://github.com/pytorch/pytorch/blob/b6929aef08eff63e67094ccec2233b6bfdec931d/torch/utils/data/dataset.py#L300
-        if idx >= len(self):
-            raise IndexError(f"Index {idx} out of bounds.")
-
-        dataset_idx = bisect.bisect_right(self.cumulative_sizes, idx)
-        if dataset_idx == 0:
-            sample_idx = idx
-        else:
-            sample_idx = idx - self.cumulative_sizes[dataset_idx - 1]
-        item = self._datasets[dataset_idx][sample_idx]
-        item["dataset_index"] = torch.tensor(dataset_idx)
-        return self.post_process(item)
-
-    def __sample__(self, idx: int) -> dict[str, torch.Tensor]:
-        """Sample a batch of items from the dataset."""
-        ds_idx = self.sampler[idx]
-        sample_idx = torch.randint(0, len(self._datasets[ds_idx]), (1,))
-        item = self._datasets[ds_idx][sample_idx]
-        item["dataset_index"] = torch.tensor(ds_idx)
-        return self.post_process(item)
-
-    def post_process(self, item: dict[str, torch.Tensor]) -> dict[str, torch.Tensor]:
-        """unify video keys across datasets"""
-        dataset_index = item.pop("dataset_index")
-        repo_id = self.repo_ids[dataset_index.item()]
-
-        # unify video keys
-        select_video_keys = (
-            self.datasets_config[repo_id]["select_video_keys"]
-            if self.datasets_config
-            else None
-        )
-        for i, k in enumerate(select_video_keys or self.meta.video_keys):
-            item[f"{UNI_VIDEO_KEY_PREFIX}{i}"] = item.pop(k, torch.zeros(3, 224, 224))
-
-        # nomalize input and output features
-        for k in [ACTION, OBS_ROBOT]:
-            fea = f"{k}.{repo_id}"
-            item[k] = self.normalize_fea({fea: item[k]})[fea]
-        return item
-
-    @property
-    def features(self) -> datasets.Features:
-        features = {}
-        for dataset in self._datasets:
-            meta_features, video_key = dataset.meta.features, dataset.meta.video_keys
-            features.update(
-                {
-                    f"{k}.{dataset.repo_id}": v
-                    for k, v in meta_features.items()
-                    if k not in video_key
-                }
-            )
-            features.update(
-                {
-                    f"{UNI_VIDEO_KEY_PREFIX}{i}": meta_features[k]
-                    for i, k in enumerate(video_key)
-                }
-            )
-        return features
-
-    @property
-    def stats(self) -> datasets.Features:
-        stats = {}
-        for dataset in self._datasets:
-            meta_stats, video_key = dataset.meta.stats, dataset.meta.video_keys
-            stats.update(
-                {
-                    f"{k}.{dataset.repo_id}": v
-                    for k, v in meta_stats.items()
-                    if k not in video_key
-                }
-            )
-            # we drop the video key from stats
-            # stats.update({f"{UNI_VIDEO_KEY_PREFIX}{i}.{dataset.repo_id}": meta_stats[k] for i, k in enumerate(video_key)})
-        return stats
-
-    def __iter__(self):
-        for i in range(len(self)):
-            if not self.use_sampler:
-                data = self.__getitem__(i)
-            else:
-                data = self.__sample__(i)
-            yield data
-
-    def __repr__(self):
-        return (
-            f"{self.__class__.__name__}(\n"
-            f"  Repository IDs: '{self.repo_ids}',\n"
-            f"  Number of Samples: {self.num_frames},\n"
-            f"  Number of Episodes: {self.num_episodes},\n"
-            f"  Type: {'video (.mp4)' if self.video else 'image (.png)'},\n"
-            f"  Recorded Frames per Second: {self.fps},\n"
-            f"  Camera Keys: {self.camera_keys},\n"
-            f"  Video Frame Keys: {self.video_frame_keys if self.video else 'N/A'},\n"
-            f"  Transformations: {self.image_transforms},\n"
-            f"  Dataset weights: {self.weights}, \n"
-            f")"
-        )

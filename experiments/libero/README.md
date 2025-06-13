@@ -28,7 +28,11 @@ uv pip install -e 3rd/LIBERO
   </tr>
   <tr>
     <td>Hume-LIBERO-GOAL</td>
-    <td><a href="https://huggingface.co/Hume-vla/Libero-Goal-1">hume-libero-goal-1</a></td>
+    <td><a href="https://huggingface.co/Hume-vla/Libero-Goal-2">hume-libero-goal</a></td>
+  </tr>
+    <tr>
+    <td>Hume-LIBERO-OBJECT</td>
+    <td><a href="https://huggingface.co/Hume-vla/Libero-Object-1">hume-libero-object</a></td>
   </tr>
 </table>
 

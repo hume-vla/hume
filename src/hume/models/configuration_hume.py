@@ -313,15 +313,6 @@ class HumeConfig(PreTrainedConfig):
     def s2_action_steps(self) -> None:
         return self.s2_chunk_size
 
-from dataclasses import dataclass, field
-
-from lerobot.common.optim.optimizers import AdamWConfig
-from lerobot.common.optim.schedulers import (
-    CosineDecayWithWarmupSchedulerConfig,
-)
-from lerobot.configs.policies import PreTrainedConfig
-from lerobot.configs.types import FeatureType, NormalizationMode, PolicyFeature
-
 
 @PreTrainedConfig.register_subclass("system2")
 @dataclass
@@ -518,11 +509,11 @@ class System2Config(PreTrainedConfig):
     @property
     def reward_delta_indices(self) -> None:
         return None
-    
+
     @property
     def slide(self) -> None:
         return 1
-    
+
     @property
     def s1_action_steps(self) -> None:
         return 1

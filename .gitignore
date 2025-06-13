@@ -167,7 +167,6 @@ temp_ckpt/
 *.json
 
 .ruff_cache
-packages
 pretrained_cpfs
 pretrianed_s2
 dev/

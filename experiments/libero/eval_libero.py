@@ -24,7 +24,7 @@ LIBERO_ENV_RESOLUTION = 256  # resolution used to render training data
 @dataclasses.dataclass
 class Args:
     host: str = "0.0.0.0"
-    port: int = 8000    
+    port: int = 8000
 
     resize_size: int = 224
     replan_steps: int = 5
@@ -95,7 +95,6 @@ def eval_libero(args: Args) -> None:
         raise ValueError(f"Unknown task suite: {args.task_suite_name}")
 
     client = _websocket_client_policy.WebsocketClientPolicy(args.host, args.port)
-
 
     # Start evaluation
     total_episodes, total_successes = 0, 0
@@ -257,8 +256,6 @@ def _quat2axisangle(quat):
         return np.zeros(3)
 
     return (quat[:3] * 2.0 * math.acos(quat[3])) / den
-
-
 
 
 if __name__ == "__main__":

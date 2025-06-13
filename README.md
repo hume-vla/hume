@@ -4,7 +4,7 @@
 
 
 
-[\[📄Paper\]](https://arxiv.org/abs/2505.21432v1)  [\[🔥Project Page\]](https://hume-vla.github.io/) [\[📖 Document\]](#documents)
+[\[📄Paper\]](https://arxiv.org/abs/2505.21432)  [\[🔥Project Page\]](https://hume-vla.github.io/) [\[📖 Document\]](#documents)
 
 ![perform](.assets/teaser_00.png)
 

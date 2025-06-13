@@ -110,7 +110,7 @@ bash scripts/train_vqh_s1.sh
 </table>
 
 ## 🎄 Datasets
-- You can download all lerobot dataset used in our projetc from [here](https://huggingface.co/IPEC-COMMUNITY)
+- You can download all lerobot dataset used in our project from [here](https://huggingface.co/IPEC-COMMUNITY)
 - If you want to train Hume using your own dataset, check the convert scripts in [any4lerobot](https://github.com/Tavish9/any4lerobot): 🚀 A collection of utilities and tools for LeRobot. ![GitHub Repo stars](https://img.shields.io/github/stars/Tavish9/any4lerobot)
 
 

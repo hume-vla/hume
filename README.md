@@ -4,7 +4,7 @@
 
 
 
-[\[📄Paper\]](https://arxiv.org/abs/2505.21432)  [\[🔥Project Page\]](https://hume-vla.github.io/) [\[📖 Document\]](#documents)
+[\[📄Paper\]](https://arxiv.org/abs/2505.21432)  [\[🔥Project Page\]](https://hume-vla.github.io/) [\[📖 Document\]](#documents) [\[🤗 Model Zoo\]](https://huggingface.co/collections/Hume-vla/hume-model-zoo-684be6e5d062717593589a9a)
 
 ![perform](.assets/teaser_00.png)
 

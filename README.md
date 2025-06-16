@@ -111,6 +111,38 @@ bash scripts/train_vqh_s1.sh
 
 ## 🎄 Datasets
 - You can download all lerobot dataset used in our project from [here](https://huggingface.co/IPEC-COMMUNITY)
+<table>
+  <tr>
+    <th>Dataset Name</th>
+    <th>Link</th>
+  </tr>
+  <tr>
+    <td>LIBERO-Spatial</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/libero_spatial_no_noops_lerobot">IPEC-COMMUNITY/libero_spatial_no_noops_lerobot</a></td>
+  </tr>
+  <tr>
+    <td>LIBERO-Goal</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/libero_goal_no_noops_lerobot">IPEC-COMMUNITY/libero_goal_no_noops_lerobot</a></td>
+  </tr>
+  <tr>
+    <td>LIBERO-Object</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/libero_object_no_noops_lerobot">IPEC-COMMUNITY/libero_object_no_noops_lerobot</a></td>
+  </tr>
+  <tr>
+    <td>LIBERO-10</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/libero_10_no_noops_lerobot">IPEC-COMMUNITY/libero_10_no_noops_lerobot</a></td>
+  </tr>
+  <tr>
+    <td>Bridge</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/bridge_orig_lerobot">IPEC-COMMUNITY/bridge_orig_lerobot</a></td>
+  </tr>
+  <tr>
+    <td>Fractal</td>
+    <td><a href="https://huggingface.co/datasets/IPEC-COMMUNITY/fractal20220817_data_lerobot">IPEC-COMMUNITY/fractal20220817_data_lerobot</a></td>
+  </tr>
+  
+</table>
+
 - If you want to train Hume using your own dataset, check the convert scripts in [any4lerobot](https://github.com/Tavish9/any4lerobot): 🚀 A collection of utilities and tools for LeRobot. ![GitHub Repo stars](https://img.shields.io/github/stars/Tavish9/any4lerobot)
 
 

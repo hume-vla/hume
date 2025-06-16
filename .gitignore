@@ -164,7 +164,6 @@ test/pretrained
 temp_ckpt/pretrained_model
 temp_ckpt/
 *.safetensors
-*.json
 
 .ruff_cache
 pretrained_cpfs

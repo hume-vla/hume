@@ -1,0 +1,216 @@
+{
+    "dataset": {
+        "repo_id": "fractal",
+        "episodes": null,
+        "image_transforms": {
+            "enable": true,
+            "max_num_transforms": 3,
+            "random_order": false,
+            "tfs": {
+                "brightness": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "brightness": [
+                            0.8,
+                            1.2
+                        ]
+                    }
+                },
+                "contrast": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "contrast": [
+                            0.8,
+                            1.2
+                        ]
+                    }
+                },
+                "saturation": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "saturation": [
+                            0.5,
+                            1.5
+                        ]
+                    }
+                },
+                "hue": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "hue": [
+                            -0.05,
+                            0.05
+                        ]
+                    }
+                },
+                "sharpness": {
+                    "weight": 1.0,
+                    "type": "SharpnessJitter",
+                    "kwargs": {
+                        "sharpness": [
+                            0.5,
+                            1.5
+                        ]
+                    }
+                },
+                "crop_resize": {
+                    "weight": 1.0,
+                    "type": "RandomResizedCrop",
+                    "kwargs": {
+                        "size": [
+                            256,
+                            320
+                        ],
+                        "scale": [
+                            0.9,
+                            0.95
+                        ],
+                        "ratio": [
+                            1.0,
+                            1.0
+                        ]
+                    }
+                },
+                "rotate": {
+                    "weight": 1.0,
+                    "type": "RadomRotate",
+                    "kwargs": {
+                        "degrees": [
+                            -5,
+                            5
+                        ]
+                    }
+                }
+            }
+        },
+        "wrist_transforms": {
+            "enable": true,
+            "max_num_transforms": 3,
+            "random_order": false,
+            "tfs": {
+                "brightness": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "brightness": [
+                            0.8,
+                            1.2
+                        ]
+                    }
+                },
+                "contrast": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "contrast": [
+                            0.8,
+                            1.2
+                        ]
+                    }
+                },
+                "saturation": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "saturation": [
+                            0.5,
+                            1.5
+                        ]
+                    }
+                },
+                "hue": {
+                    "weight": 1.0,
+                    "type": "ColorJitter",
+                    "kwargs": {
+                        "hue": [
+                            -0.05,
+                            0.05
+                        ]
+                    }
+                },
+                "sharpness": {
+                    "weight": 1.0,
+                    "type": "SharpnessJitter",
+                    "kwargs": {
+                        "sharpness": [
+                            0.5,
+                            1.5
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "policy": {
+        "type": "system2",
+        "n_obs_steps": 1,
+        "normalization_mapping": {
+            "VISUAL": "IDENTITY",
+            "STATE": "MEAN_STD",
+            "ACTION": "MEAN_STD"
+        },
+        "optimizer_lr": 0.00025,
+        "input_features": {
+            "observation.images.image": {
+                "type": "VISUAL",
+                "shape": [
+                    3,
+                    256,
+                    320
+                ]
+            },
+            "observation.state": {
+                "type": "STATE",
+                "shape": [
+                    8
+                ]
+            }
+        },
+        "output_features": {
+            "action": {
+                "type": "ACTION",
+                "shape": [
+                    7
+                ]
+            }
+        },
+        "n_action_steps": 50,
+        "max_state_dim": 32,
+        "max_action_dim": 32,
+        "resize_imgs_with_padding": [
+            224,
+            224
+        ],
+        "empty_cameras": 0,
+        "adapt_to_pi_aloha": false,
+        "use_delta_joint_actions_aloha": false,
+        "tokenizer_max_length": 64,
+        "proj_width": 1024,
+        "num_steps": 10,
+        "use_cache": true,
+        "attention_implementation": "eager",
+        "freeze_vision_encoder": true,
+        "train_expert_only": false,
+        "train_state_proj": true,
+        "optimizer_betas": [
+            0.9,
+            0.95
+        ],
+        "optimizer_eps": 1e-08,
+        "optimizer_weight_decay": 1e-10,
+        "scheduler_warmup_steps": 1000,
+        "scheduler_decay_steps": 30000,
+        "scheduler_decay_lr": 2.5e-06
+    },
+    "seed": 42,
+    "num_workers": 4,
+    "batch_size": 16,
+    "steps": 200000,
+    "log_freq": 200,
+    "save_freq": 20000,
+    "use_policy_training_preset": true
+}

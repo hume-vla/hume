@@ -64,7 +64,6 @@ action = hume.infer(observation) # (B, action_dim)
 ## Documents
 
 ### 🛠️ Installation
-> [!NOTE]
 > We use [uv](https://docs.astral.sh/uv/getting-started/installation/) manage our project dependency
 >
 > Install `uv` in just one line command

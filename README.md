@@ -88,6 +88,7 @@ bash scripts/train_s2.sh
 
 ### 🌟 **Train System2 and Value Query Head**
 - Set `pretrained_s2_path` in  `scripts/train_vqh_s1.sh`
+- Download [DinoV2-Small](https://huggingface.co/facebook/dinov2-small) and set `--pretrained_dino_path` to the DinoV2-Small in `scripts/train_vqh_s1.sh`
 - Launch training
 ```bash
 bash scripts/train_vqh_s1.sh

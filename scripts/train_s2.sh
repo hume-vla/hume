@@ -1,4 +1,4 @@
-DEBUG=true
+DEBUG=false
 if [ "$DEBUG" = true ]; then
   GPUS=1
   PER_DEVICE_BATCH_SIZE=8
@@ -15,7 +15,8 @@ GPUS_PER_NODE=${GPUS_PER_NODE:-2}
 NODES=$((GPUS / GPUS_PER_NODE))
 PER_DEVICE_BATCH_SIZE=${PER_DEVICE_BATCH_SIZE:-32}
 wandb_enable=${wandb_enable:-true}
-num_workers=${num_workers:-4}
+num_workers=${num_workers:-0}
+save_freq=${save_freq:-5000}
 
 # set environments
 source scripts/env.sh

@@ -134,7 +134,7 @@ def make_policy(
 
 def make_dataset(
     cfg: TrainPipelineConfig, **kwargs
-) -> LeRobotDataset | MultiLeRobotDataset:
+) -> LeRobotDataset:
     """Handles the logic of setting up delta timestamps and image transforms before creating a dataset.
 
     Args:
@@ -144,7 +144,7 @@ def make_dataset(
         NotImplementedError: The MultiLeRobotDataset is currently deactivated.
 
     Returns:
-        LeRobotDataset | MultiLeRobotDataset
+        LeRobotDataset
     """
     image_transforms = (
         ImageTransforms(cfg.dataset.image_transforms)

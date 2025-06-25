@@ -28,7 +28,7 @@ from hume import HumePolicy
 import numpy as np
 
 # load policy
-hume = HumePolicy.from_pretrained("/path/to/checkpoints")
+hume = HumePolicy.from_pretrained("/path/to/checkpoints").to("cuda")
 
 # config Test-Time Computing args
 hume.init_infer(

@@ -7,7 +7,9 @@ from contextlib import nullcontext
 from dataclasses import dataclass, field
 from pprint import pformat
 from typing import Any
-
+import datetime as dt
+from pathlib import Path
+import copy
 import torch
 import torch.nn as nn
 from accelerate import Accelerator, DistributedDataParallelKwargs
@@ -102,6 +104,53 @@ class TrainPipelineConfig(LeroBotTrainPipelineConfig):
 
     # # wandb
     # wandb: WandBConfig = field(default_factory=WandBConfig(entity="qudelin-org"))
+
+    def validate(self):
+        over_cfg = copy.deepcopy(self.policy)
+        # NOTE: policy overwrite order: default > config_path >> path > cli
+        super().validate()
+        logging.info(colored("overwrite additional policy features", "yellow"))
+        if over_cfg:
+            self.policy.input_features, self.policy.output_features = (
+                over_cfg.input_features,
+                over_cfg.output_features,
+            )
+
+        if self.policy_optimizer_lr:
+            self.policy.optimizer_lr = self.policy_optimizer_lr
+        if self.actor_lr:
+            self.policy.actor_lr = self.actor_lr
+        if self.critic_lr:
+            self.policy.critic_lr = self.critic_lr
+        if self.temp_lr:
+            self.policy.temp_lr = self.temp_lr
+        self.policy.scheduler_decay_steps = self.steps
+        self.policy.freeze_vision_encoder = self.freeze_vision_encoder
+        self.policy.freeze_s2 = self.freeze_s2
+        self.policy.theta1 = self.theta1
+        self.policy.theta2 = self.theta2
+        self.policy.noise_slides_eps = self.noise_slides_eps
+        self.policy.noise_slides_alp = self.noise_slides_alp
+        self.policy.s1_chunk_size = self.s1_chunk_size
+        self.policy.s2_chunk_size = self.s2_chunk_size
+
+        self.policy.n_action_steps = self.s2_chunk_size
+        self.policy.vqh_chunk_size = self.vqh_chunk_size
+        self.policy.empty_cameras = self.empty_cameras
+        self.policy.num_pos = self.num_pos
+        self.policy.discount = self.discount
+        self.policy.next_obs_offset = self.next_obs_offset
+        self.policy.s1_his_state_size = self.s1_his_state_size
+        self.policy.cache_s2_actions = self.cache_s2_actions
+
+        if not self.resume:
+            now = dt.datetime.now()
+            train_dir = f"{now:%Y-%m-%d}/{now:%H-%M-%S}_{self.job_name}"
+            self.output_dir = Path(f"outputs/{self.output_base}") / train_dir
+
+        if self.use_policy_training_preset and not self.resume:
+            self.optimizer = self.policy.get_optimizer_preset()
+            self.scheduler = self.policy.get_scheduler_preset()
 
 
 def update_policy(

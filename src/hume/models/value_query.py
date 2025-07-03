@@ -448,17 +448,12 @@ class TanhMultivariateNormalDiag(TransformedDistribution):
         super().__init__(base_distribution, transform)
 
     def mode(self) -> torch.Tensor:
-        """返回分布的众数"""
-        # 对于正态分布，众数就是均值
         mode = self.loc
-        # 应用变换
         for transform in self.transforms:
             mode = transform(mode)
         return mode
 
     def stddev(self) -> torch.Tensor:
-        """返回变换后的标准差（近似值）"""
-        # 注意：这只是一个近似，因为非线性变换后的标准差计算复杂
         return self.transform(self.loc + self.scale_diag) - self.transform(self.loc)
 
     def log_prob(self, value: torch.Tensor) -> torch.Tensor:

@@ -1493,7 +1493,7 @@ class FastVisuoMatching(nn.Module):
         if time is None:
             time = (
                 self.sample_time(actions.shape[0], actions.device) * self.config.theta1
-            )  # s2: [1, 0.1] -> s1: [0.1, 0]
+            )
         time_expanded = time[:, None, None]
         x_t = time_expanded * noise + (1 - time_expanded) * actions
         u_t = noise - actions

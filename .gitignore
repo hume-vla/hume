@@ -172,3 +172,5 @@ dev/
 experiments/libero/logs
 exported
 test
+model/
+outputs_cpfs/

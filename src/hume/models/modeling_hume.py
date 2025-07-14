@@ -359,9 +359,9 @@ class HumePolicy(PreTrainedPolicy):
 
             # convert action chunk shape to (replan_steps, batch, action_dim)
             action_chunk = action_chunk.transpose(1, 0, 2)
-            assert (
-                len(action_chunk) >= self.infer_cfg.replan_steps
-            ), f"We want to replan every {self.infer_cfg.replan_steps} steps, but policy only predicts {len(action_chunk)} steps."
+            assert len(action_chunk) >= self.infer_cfg.replan_steps, (
+                f"We want to replan every {self.infer_cfg.replan_steps} steps, but policy only predicts {len(action_chunk)} steps."
+            )
             self.action_plan.extend(action_chunk[: self.infer_cfg.replan_steps])
 
         self.infer_step += 1
@@ -1224,7 +1224,16 @@ class System2(nn.Module):
         return losses, past_key_values
 
     def sample_actions(
-        self, images, img_masks, lang_tokens, lang_masks, state, noise=None
+        self,
+        images,
+        img_masks,
+        lang_tokens,
+        lang_masks,
+        state,
+        noise=None,
+        past_key_values=None,
+        time_temp=1.0,
+        noise_temp=1.0,
     ) -> Tensor:
         """Do a full inference forward and compute the action (batch_size x num_steps x num_motors)"""
         bsize = state.shape[0]
@@ -1245,21 +1254,24 @@ class System2(nn.Module):
         prefix_position_ids = torch.cumsum(prefix_pad_masks, dim=1) - 1
 
         # Compute image and language key value cache
-        _, past_key_values = self.paligemma_with_expert.forward(
-            attention_mask=prefix_att_2d_masks,
-            position_ids=prefix_position_ids,
-            past_key_values=None,
-            inputs_embeds=[prefix_embs, None],
-            use_cache=self.config.use_cache,
-            fill_kv_cache=True,
-        )
+        if past_key_values is None:
+            _, past_key_values = self.paligemma_with_expert.forward(
+                attention_mask=prefix_att_2d_masks,
+                position_ids=prefix_position_ids,
+                past_key_values=None,
+                inputs_embeds=[prefix_embs, None],
+                use_cache=self.config.use_cache,
+                fill_kv_cache=True,
+            )
 
         dt = -1.0 / self.config.num_steps
         dt = torch.tensor(dt, dtype=torch.float32, device=device)
 
         x_t = noise
-        time = torch.tensor(1.0, dtype=torch.float32, device=device)
-        while time >= -dt / 2:
+        time = torch.tensor(
+            time_temp, dtype=torch.float32, device=device
+        )  # TODO: Add temp
+        while time >= -dt / 2 + (1 - self.config.theta2):
             expanded_time = time.expand(bsize)
             v_t = self.denoise_step(
                 state,
@@ -1270,7 +1282,7 @@ class System2(nn.Module):
             )
 
             # Euler step
-            x_t += dt * v_t
+            x_t += dt * v_t * noise_temp  # TODO: Add noise temp
             time += dt
         return x_t
 

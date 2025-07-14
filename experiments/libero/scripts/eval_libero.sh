@@ -14,6 +14,44 @@ ckpts=(
 # Server Info
 host="0.0.0.0"
 port=8000
+port_lock_file=""
+
+# Find available port
+find_available_port() {
+    while true; do
+        port_lock_file="/tmp/port_${port}.lock"
+        
+        # Check if port is in use by netstat and lock file doesn't exist
+        if ! netstat -tuln | grep -q ":${port} " && [ ! -f "$port_lock_file" ]; then
+            # Create lock file
+            echo $$ > "$port_lock_file"
+            echo "Using port: $port (lock file created: $port_lock_file)"
+            break
+        else
+            if netstat -tuln | grep -q ":${port} "; then
+                echo "Port $port is in use by netstat"
+            fi
+            if [ -f "$port_lock_file" ]; then
+                echo "Port $port lock file exists: $port_lock_file"
+            fi
+            port=$((port + 1))
+        fi
+    done
+}
+
+# Cleanup function to remove lock file
+cleanup_port_lock() {
+    if [ -n "$port_lock_file" ] && [ -f "$port_lock_file" ]; then
+        echo "Removing port lock file: $port_lock_file"
+        rm -f "$port_lock_file"
+    fi
+}
+
+# Set trap to cleanup on exit or interrupt
+trap cleanup_port_lock EXIT SIGINT SIGTERM
+
+# Find and lock available port
+find_available_port
 
 # TTS args
 s2_candidates_num=5
@@ -55,8 +93,9 @@ for ckpt in ${ckpts[@]}; do
     close_sever() {
         echo "Closing policy server ${session_name}"
         tmux kill-session -t "${session_name}"
+        cleanup_port_lock
     }
-    trap close_sever SIGINT
+    trap close_sever EXIT SIGINT SIGTERM
 
     # start eval
     python experiments/libero/eval_libero.py \

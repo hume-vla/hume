@@ -49,7 +49,7 @@ hume.init_infer(
 observation = {
     "observation.images.image": np.zeros((1,224,224,3), dtype = np.uint8), # (B, H, W, C)
     "observation.images.wrist_image": np.zeros((1,224,224,3), dtype = np.uint8), # (B, H, W, C)
-    "observation.state": np.zeros((1, 7)), # (B, state_dim)
+    "observation.state": np.zeros((1, 8)), # (B, state_dim) match the state dimension of the corresponding model
     "task": ["Lift the papper"],
 }
 
